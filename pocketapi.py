@@ -113,6 +113,6 @@ class API(object):
             raise e
 
 if  __name__ == '__main__':
-    myapi = API(18792544700,199312,'李姗姗')
+    myapi = API()
     for x in myapi.chatroom():
         print(x)
