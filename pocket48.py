@@ -3,15 +3,10 @@
 @author: DipperStar
 @mail: ssr@yinheng.xyz
 '''
-import requests
-import json
-import time
 from pocketapi import API
 from mongo import MongoDB
-from pymongo import MongoClient
-from apscheduler.schedulers.blocking import BlockingScheduler
-import pymongo
-from cqhttp import CQHttp
+from cqapi import CQclient
+from Scheduler import SCHEDULE
 import time
 import json
 
@@ -19,24 +14,25 @@ false = 'flase'
 true = 'true'
 null = 'null'
 
-class POCKET48(API):
+class POCKET48(API, CQclient, SCHEDULE):
     '''
-
+    口袋48模块
+    : func _todo: 查询房间消息
     '''
     def __init__(self, mobile, password, membername):
         super().__init__(mobile, password, membername)
+        CQclient.__init__(self)
+        SCHEDULE.__init__(self)
         self.dbchat = MongoDB('Poket48', str(self.roomId))
-        self.Sched = BlockingScheduler()
-        self.bot = CQHttp(api_root='http://127.0.0.1:5700/')
-        self.single_id = []
-        self.group_id = []
-        self.msgType = dict(TEXT=self.text,VIDEO=self.video,IMAGE=self.image,AUDIO=self.audio)
+        self.msgType = dict(TEXT=self.text,VIDEO=self.video,\
+                            IMAGE=self.image,AUDIO=self.audio)
 
     def update_chat(self):
         list_msg = []
         for chat in self.chatroom():
             if self.dbchat.update(chat, upsert=True) == 'success':
                 list_msg.append(chat)
+        list_msg.reverse()
         return list_msg
 
     def format_chat(self, msg):
@@ -46,7 +42,8 @@ class POCKET48(API):
             return '未定义类型消息...'
 
     def stamp2str(self, stamp):
-        time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(stamp/1000))
+        time_str = time.strftime('%Y-%m-%d %H:%M:%S',
+                                 time.localtime(stamp/1000))
         return time_str
 
     def text(self, msg):
@@ -63,16 +60,15 @@ class POCKET48(API):
                 nickName, extInfo['text'],
                 self.stamp2str(msg['msgTime'])))
         elif extInfo['messageType'] == 'LIVEPUSH':
-            playStreamPath, playDetail = self.getlivedetail(extInfo['liveId'])
+            playStreamPath, playDetail = self.livedetail(extInfo['liveId'])
             if not playStreamPath:
                 playStreamPath = "暂无"
             msg = [{'type': 'text', 'data': {
-                'text': '小偶像开直播啦 \n 直播标题：%s \n \
-                           直播封面：' % extInfo['liveTitle']}},
+                'text': '小偶像开直播啦 \n直播标题：%s \n' % extInfo['liveTitle']}},
                    {'type': 'image', 'data': {
                        'file': 'https://source.48.cn%s' % extInfo['liveCover']}},
                    {'type': 'text', 'data': {
-                       'text': '直播地址https://h5.48.cn/2019appshare/memberLiveShare/index.html?id=%s \n推流地址：%s开始时间：%s' % (
+                     'text': '直播地址：https://h5.48.cn/2019appshare/memberLiveShare/index.html?id=%s\n推流地址：%s\n开始时间：%s' % (
                            extInfo['liveId'],
                            playStreamPath,
                            self.stamp2str(msg['msgTime']))}}
@@ -121,25 +117,21 @@ class POCKET48(API):
                ]
         return msg
 
-    def read_chat(self):
+    def _todo(self):
         for chat in self.update_chat():
             msg = self.format_chat(chat)
             self.single_msg(msg)
             time.sleep(1)
 
-    def single_msg(self, msg):
-        try:
-            return [self.bot.send_private_msg(message = msg,\
-                        user_id=_id,  auto_escape=False) for _id in self.single_id]
-        except:
-            print(msg)
-
-    def group_msg(self, msg):
-        try:
-            return [self.bot.send_group_msg(message=msg, \
-                        group_id=_id, auto_escape=False) for _id in self.group_id]
-        except:
-            print(msg)
-
-    def run(self):
-        pass
+if __name__ == '__main__':
+    lishanshan = POCKET48(urs1, psw1, '李姗姗')
+    lishanshan.interval_time = 120
+    xiongxinyao = POCKET48(urs1, psw1, '熊心瑶')
+    xiongxinyao.interval_time = 240
+    fangqi = POCKET48(urs1, psw1, '方琪')
+    fangqi.interval_time = 240
+    lishanshan.run()
+    xiongxinyao.run()
+    fangqi.run()
+    schedul = SCHEDULE()
+    schedul.block()  # 阻塞

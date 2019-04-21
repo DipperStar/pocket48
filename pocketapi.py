@@ -4,11 +4,10 @@
 @mail: ssr@yinheng.xyz
 '''
 import requests
-import json
-import getopt
-import sys
 import urllib3
 import time
+from mongo import MongoDB
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class API(object):
@@ -27,13 +26,17 @@ class API(object):
         self.mobile = mobile
         self.password = password
         self.membername = membername
-        self.hastoken = dict(timestamp=0)
+        self.dbtoken = MongoDB('Poket48', 'dbtoken')
         self.headers = {'Host': 'pocketapi.48.cn',
                                 'accept': '*/*',
                                 'Accept-Language': 'zh-Hans-CN;q=1',
-                                'User-Agent': 'PocketFans201807/6.0.0 (iPhone; iOS 12.2; Scale/2.00)',
+                                'User-Agent': \
+                            'PocketFans201807/6.0.0 (iPhone; iOS 12.2; Scale/2.00)',
                                 'Accept-Encoding': 'gzip, deflate',
-                                'appInfo': '{"vendor":"apple","deviceId":"0","appVersion":"6.0.0","appBuild":"190409","osVersion":"12.2.0","osType":"ios","deviceName":"iphone","os":"ios"}',
+                                'appInfo': '{"vendor":"apple","deviceId":"0", \
+                                "appVersion":"6.0.0","appBuild":"190409", \
+                                "osVersion":"12.2.0","osType":"ios", \
+                                "deviceName":"iphone","os":"ios"}',
                                 'Content-Type': 'application/json;charset=utf-8',
                                 'Connection': 'keep-alive',
                                 }
@@ -46,10 +49,17 @@ class API(object):
         获取token,超过1天则重新登录
         : return: token string
         '''
-        if self._nowtime - self.hastoken['timestamp'] > 3600*24:
+        hastoken = list(self.dbtoken.find({'mobile': self.mobile}))
+        if not hastoken:
             token = self.login()
-            self.hastoken = dict(timestamp=self._nowtime, token=token)
-        return self.hastoken['token']
+            self.dbtoken.update(dict(timestamp=self._nowtime,
+                                     token=token, mobile=self.mobile), upsert=True)
+        elif self._nowtime - hastoken[0]['timestamp'] > 3600*24:
+            self.dbtoken.remove({'mobile': self.mobile})
+            token = self.login()
+            self.dbtoken.update(dict(timestamp=self._nowtime,
+                                     token=token, mobile=self.mobile), upsert=True)
+        return list(self.dbtoken.find({'mobile': self.mobile}))[0]['token']
 
     @property
     def _nowtime(self):
@@ -70,8 +80,10 @@ class API(object):
                     'name': self.membername
                     }
         try:
-            response = requests.post(url, json=data, headers=self.headers, verify=False).json()['content']['data'][0]
-            return dict(roomName=response['targetName'], ownerName=response['ownerName'], roomId=response['targetId'],
+            response = requests.post(url, json=data, headers=self.headers,
+                                     verify=False).json()['content']['data'][0]
+            return dict(roomName=response['targetName'],
+                ownerName=response['ownerName'], roomId=response['targetId'],
                         ownerId=response['ownerId'])
         except Exception as e:
             raise e
@@ -111,6 +123,26 @@ class API(object):
             return res
         except Exception as e:
             raise e
+
+    def livedetail(self, liveId):
+        '''
+        获取直播详情
+        :param liveId: 直播编号 int
+        :return: playStreamPath string, response
+        '''
+        url = "https://pocketapi.48.cn/live/api/v1/live/getLiveOne"
+        form = {
+                    "liveId": str(liveId)
+                    }
+        try:
+            response = requests.post(url, json=form, headers=self.headers).json()
+            if response['status'] == 200:
+                playStreamPath = response['content']['playStreamPath']
+                return playStreamPath, response
+            else:
+                return False, False
+        except:
+            return False, False
 
 if  __name__ == '__main__':
     myapi = API()

@@ -4,8 +4,12 @@
 @mail: ssr@yinheng.xyz
 '''
 import pymongo
+import traceback
 
 class MongoDB:
+	'''
+	基于pymongo封装的CURD
+	'''
 	def __init__(self, db, collections):
 		self.client = pymongo.MongoClient('localhost', 27017)
 		self.db = self.client[db]
@@ -35,6 +39,7 @@ class MongoDB:
 			else:
 				return 'success'
 		except:
+			print(traceback.print_exc())
 			return False
 
 	def update_many(self, data, upsert = False):
