@@ -28,6 +28,10 @@ class POCKET48(API, CQclient, SCHEDULE):
                             IMAGE=self.image,AUDIO=self.audio)
 
     def update_chat(self):
+        '''
+        更新房间消息到数据库，返回新的消息列表
+        :return: 消息列表 list
+        '''
         list_msg = []
         for chat in self.chatroom():
             if self.dbchat.update(chat, upsert=True) == 'success':
@@ -36,17 +40,32 @@ class POCKET48(API, CQclient, SCHEDULE):
         return list_msg
 
     def format_chat(self, msg):
+        '''
+        格式化房间消息
+        :param msg: 消息 json
+        :return: 返回格式化后的消息 string
+        '''
         if msg['msgType'] in self.msgType:
             return self.msgType[msg['msgType']](msg)
         else:
             return '未定义类型消息...'
 
     def stamp2str(self, stamp):
+        '''
+        时间戳转时间 %Y-%m-%d %H:%M:%S
+        :param stamp: 时间戳
+        :return: 标准时间格式 %Y-%m-%d %H:%M:%S
+        '''
         time_str = time.strftime('%Y-%m-%d %H:%M:%S',
                                  time.localtime(stamp/1000))
         return time_str
 
     def text(self, msg):
+        '''
+        处理text类消息
+        :param msg: 消息 json
+        :return: 格式化后的消息 string
+        '''
         extInfo = json.loads(msg['extInfo'])
         nickName = extInfo['user']['nickName']
         if extInfo['messageType'] == 'TEXT':
@@ -72,28 +91,47 @@ class POCKET48(API, CQclient, SCHEDULE):
                            extInfo['liveId'],
                            playStreamPath,
                            self.stamp2str(msg['msgTime']))}}
-                   ]
+                       ]
         elif extInfo['messageType'] == 'FLIPCARD':
             msg = ('%s：%s\n问题内容：%s\n%s' % (
                 nickName, extInfo['answer'],
                 extInfo['question'], self.stamp2str(msg['msgTime'])))
+        elif extInfo['messageType'] == 'VOTE':
+            msg = ('%s：发起了投票：\n%s\n%s' % (
+                extInfo['user']['nickName'], extInfo['text'],
+                self.stamp_to_str(data['msgTime'])))
+        elif extInfo['messageType'] == 'FLIPCARD':
+            # INFO('idol翻牌')
+            msg = ('%s：%s\n问题内容：%s\n%s' % (
+                extInfo['user']['nickName'], extInfo['answer'],
+                extInfo['question'], self.stamp_to_str(data['msgTime'])))
         else:
-            msg = '有未知格式的文字消息'
+            msg = '有未知格式的消息'
         return msg
 
     def video(self, msg):
+        '''
+        处理video类消息
+        :param msg: 消息 json
+        :return: 格式化后的消息 string
+        '''
         bodys = json.loads(msg['bodys'])
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
-            'text': '%s：视频消息' % extInfo['user']['nickName']}},
-               {'type': 'record', 'data': {
-                   'file': '%s' % bodys['url']}},
-               {'type': 'text', 'data': {
-                   'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
-               ]
+                    'text': '%s：视频消息' % extInfo['user']['nickName']}},
+                    {'type': 'text', 'data': {
+                        'text': '%s' % bodys['url']}},
+                    {'type': 'text', 'data': {
+                        'text': '\n%s' % self.stamp_to_str(data['msgTime'])}}
+                    ]
         return msg
 
     def audio(self, msg):
+        '''
+        处理audio类消息
+        :param msg: 消息 json
+        :return: 格式化后的消息 string
+        '''
         bodys = json.loads(msg['bodys'])
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
@@ -101,11 +139,16 @@ class POCKET48(API, CQclient, SCHEDULE):
                {'type': 'record', 'data': {
                    'file': '%s' % bodys['url']}},
                {'type': 'text', 'data': {
-                   'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
+                   'text': '\n%s' % self.stamp2str(data['msgTime'])}}
                ]
         return msg
 
     def image(self, msg):
+        '''
+        处理image类消息
+        :param msg: 消息 json
+        :return: 格式化后的消息 string
+        '''
         bodys = json.loads(msg['bodys'])
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
@@ -118,20 +161,21 @@ class POCKET48(API, CQclient, SCHEDULE):
         return msg
 
     def _todo(self):
+        '''
+        发送格式化后的消息到酷Q
+        :return: 0
+        '''
         for chat in self.update_chat():
             msg = self.format_chat(chat)
             self.single_msg(msg)
             time.sleep(1)
 
 if __name__ == '__main__':
-    lishanshan = POCKET48(urs1, psw1, '李姗姗')
-    lishanshan.interval_time = 120
-    xiongxinyao = POCKET48(urs1, psw1, '熊心瑶')
-    xiongxinyao.interval_time = 240
-    fangqi = POCKET48(urs1, psw1, '方琪')
-    fangqi.interval_time = 240
-    lishanshan.run()
-    xiongxinyao.run()
-    fangqi.run()
+    miffy = POCKET48(urs,psw,'刘力菲')  # 实例化小偶像监控
+    miffy.interval_time = 60
+    satsuko = POCKET48(urs,psw,'李姗姗')
+    satsuko.interval_time = 30
+    miffy.run()  # 开启计划任务
+    satsuko.run()
     schedul = SCHEDULE()
-    schedul.block()  # 阻塞
+    schedul.block()  # 阻塞至进程关闭

@@ -114,7 +114,6 @@ class API(object):
         : return: 发言信息 json
         '''
         url = 'https://pocketapi.48.cn/im/api/v1/chatroom/msg/list/homeowner'
-        false = 'false'
         headers = self.headers
         headers.update({'token': self._token})
         data = dict(needTop1Msg=False, roomId=str(self.roomId), ownerId=str(self.ownerId))
@@ -143,8 +142,3 @@ class API(object):
                 return False, False
         except:
             return False, False
-
-if  __name__ == '__main__':
-    myapi = API()
-    for x in myapi.chatroom():
-        print(x)
