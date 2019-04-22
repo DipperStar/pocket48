@@ -1,4 +1,4 @@
-# Javlibrary
+# Pocket48
 -----------------------------------
 ### 口袋48APP 监控(Python3)，该项目实现以下功能:
 * 登录并获取token
@@ -45,6 +45,7 @@
 | login   | 登录  | 手机，密码 |
 | searchroom   |  查询指定成员roomId  | 成员全名 |
 | chatroom   |  查询成员房间消息  | roomId,ownerId |
+| livedetail   |  查询直播详情  | liveId |
 
 ## 数据库
 -------------------------------------------
