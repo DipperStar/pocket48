@@ -16,6 +16,7 @@ class API(object):
     : func searchroom: 查找指定成员房间信息
     : func login: 登录
     : func chatroom: 查询房间消息
+    : func livedetail: 获取直播详情
     '''
     def __init__(self, mobile, password, membername):
         '''
@@ -27,20 +28,20 @@ class API(object):
         self.password = password
         self.membername = membername
         self.dbtoken = MongoDB('Poket48', 'dbtoken')
-        self.headers = {'Host': 'pocketapi.48.cn',
-                                'accept': '*/*',
-                                'Accept-Language': 'zh-Hans-CN;q=1',
-                                'User-Agent': \
-                            'PocketFans201807/6.0.0 (iPhone; iOS 12.2; Scale/2.00)',
-                                'Accept-Encoding': 'gzip, deflate',
-                                'appInfo': '{"vendor":"apple","deviceId":"0", \
+        self.headers = {
+            'Host': 'pocketapi.48.cn',
+            'accept': '*/*',
+            'Accept-Language': 'zh-Hans-CN;q=1',
+            'User-Agent': 'PocketFans201807/6.0.0 (iPhone; iOS 12.2; Scale/2.00)',
+            'Accept-Encoding': 'gzip, deflate',
+            'appInfo': '{"vendor":"apple","deviceId":"0", \
                                 "appVersion":"6.0.0","appBuild":"190409", \
                                 "osVersion":"12.2.0","osType":"ios", \
                                 "deviceName":"iphone","os":"ios"}',
-                                'Content-Type': 'application/json;charset=utf-8',
-                                'Connection': 'keep-alive',
-                                }
-        dic_data = self.searchroom()
+            'Content-Type': 'application/json;charset=utf-8',
+            'Connection': 'keep-alive',
+        }
+        dic_data = self.searchroom
         self.ownerId, self.roomId = dic_data['ownerId'], dic_data['roomId']
 
     @property
@@ -51,14 +52,22 @@ class API(object):
         '''
         hastoken = list(self.dbtoken.find({'mobile': self.mobile}))
         if not hastoken:
-            token = self.login()
-            self.dbtoken.update(dict(timestamp=self._nowtime,
-                                     token=token, mobile=self.mobile), upsert=True)
-        elif self._nowtime - hastoken[0]['timestamp'] > 3600*24:
+            token = self.login
+            self.dbtoken.update(
+                dict(
+                    timestamp=self._nowtime,
+                    token=token,
+                    mobile=self.mobile),
+                upsert=True)
+        elif self._nowtime - hastoken[0]['timestamp'] > 3600 * 24:
             self.dbtoken.remove({'mobile': self.mobile})
-            token = self.login()
-            self.dbtoken.update(dict(timestamp=self._nowtime,
-                                     token=token, mobile=self.mobile), upsert=True)
+            token = self.login
+            self.dbtoken.update(
+                dict(
+                    timestamp=self._nowtime,
+                    token=token,
+                    mobile=self.mobile),
+                upsert=True)
         return list(self.dbtoken.find({'mobile': self.mobile}))[0]['token']
 
     @property
@@ -69,6 +78,7 @@ class API(object):
         '''
         return time.time()
 
+    @property
     def searchroom(self):
         '''
         获取成员房间信息
@@ -77,17 +87,17 @@ class API(object):
         '''
         url = 'https://pocketapi.48.cn/im/api/v1/im/search'
         data = {
-                    'name': self.membername
-                    }
+            'name': self.membername
+        }
         try:
             response = requests.post(url, json=data, headers=self.headers,
                                      verify=False).json()['content']['data'][0]
-            return dict(roomName=response['targetName'],
-                ownerName=response['ownerName'], roomId=response['targetId'],
-                        ownerId=response['ownerId'])
+            return dict(roomName=response['targetName'], ownerName=response['ownerName'], ownerId=response['ownerId'],
+                        roomId=response['targetId'])
         except Exception as e:
             raise e
 
+    @property
     def login(self):
         '''
         登录
@@ -98,14 +108,19 @@ class API(object):
         try:
             url = 'https://pocketapi.48.cn/user/api/v1/login/app/mobile'
             data = {
-                        "pwd": str(self.password),
-                        "mobile": str(self.mobile),
-                        }
-            res = requests.post(url, headers=self.headers, json=data, verify=False).json()
+                "pwd": str(self.password),
+                "mobile": str(self.mobile),
+            }
+            res = requests.post(
+                url,
+                headers=self.headers,
+                json=data,
+                verify=False).json()
             return res['content']['token']
         except Exception as e:
             raise e
 
+    @property
     def chatroom(self):
         '''
         获取成员房间消息
@@ -116,9 +131,13 @@ class API(object):
         url = 'https://pocketapi.48.cn/im/api/v1/chatroom/msg/list/homeowner'
         headers = self.headers
         headers.update({'token': self._token})
-        data = dict(needTop1Msg=False, roomId=str(self.roomId), ownerId=str(self.ownerId))
+        data = dict(
+            needTop1Msg=False, roomId=str(
+                self.roomId), ownerId=str(
+                self.ownerId))
         try:
-            res = requests.post(url, headers=headers, json=data).json()['content']['message']
+            res = requests.post(url, headers=headers, json=data).json()[
+                'content']['message']
             return res
         except Exception as e:
             raise e
@@ -131,14 +150,15 @@ class API(object):
         '''
         url = "https://pocketapi.48.cn/live/api/v1/live/getLiveOne"
         form = {
-                    "liveId": str(liveId)
-                    }
+            "liveId": str(liveId)
+        }
         try:
-            response = requests.post(url, json=form, headers=self.headers).json()
+            response = requests.post(
+                url, json=form, headers=self.headers).json()
             if response['status'] == 200:
                 playStreamPath = response['content']['playStreamPath']
                 return playStreamPath, response
             else:
                 return False, False
-        except:
+        except BaseException:
             return False, False
