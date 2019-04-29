@@ -12,7 +12,7 @@ class CQclient(object):
 
     def __init__(self):
         self.bot = CQHttp(api_root='http://127.0.0.1:5700/')
-        self.single_id = [526189921]
+        self.single_id = []
         self.group_id = []
 
     def single_msg(self, msg):

@@ -99,12 +99,11 @@ class POCKET48(API, CQclient, SCHEDULE):
         elif extInfo['messageType'] == 'VOTE':
             msg = ('%s：发起了投票：\n%s\n%s' % (
                 extInfo['user']['nickName'], extInfo['text'],
-                self.stamp2str(data['msgTime'])))
+                self.stamp2str(msg['msgTime'])))
         elif extInfo['messageType'] == 'FLIPCARD':
-            # INFO('idol翻牌')
             msg = ('%s：%s\n问题内容：%s\n%s' % (
                 extInfo['user']['nickName'], extInfo['answer'],
-                extInfo['question'], self.stamp2str(data['msgTime'])))
+                extInfo['question'], self.stamp2str(msg['msgTime'])))
         else:
             msg = '有未知格式的消息'
         return msg
@@ -122,7 +121,7 @@ class POCKET48(API, CQclient, SCHEDULE):
             {'type': 'text', 'data': {
                 'text': '%s' % bodys['url']}},
             {'type': 'text', 'data': {
-                'text': '\n%s' % self.stamp2str(data['msgTime'])}}
+                'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
         ]
         return msg
 
@@ -139,7 +138,7 @@ class POCKET48(API, CQclient, SCHEDULE):
             {'type': 'record', 'data': {
                 'file': '%s' % bodys['url']}},
             {'type': 'text', 'data': {
-                'text': '\n%s' % self.stamp2str(data['msgTime'])}}
+                'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
         ]
         return msg
 
@@ -172,10 +171,10 @@ class POCKET48(API, CQclient, SCHEDULE):
 
 
 if __name__ == '__main__':
-    miffy = POCKET48(urs, psw, '刘力菲')  # 实例化小偶像监控
-    miffy.interval_time = 20
+    miffy = POCKET48(urs, psw, '方琪')  # 实例化小偶像监控
+    miffy.interval_time = 200
     satsuko = POCKET48(urs, psw, '李姗姗')
-    satsuko.interval_time = 30
+    satsuko.interval_time = 240
     miffy.run()  # 开启计划任务
     satsuko.run()
     schedule = SCHEDULE()
