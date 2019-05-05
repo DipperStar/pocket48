@@ -14,11 +14,13 @@ false = 'flase'
 true = 'true'
 null = 'null'
 
+
 class POCKET48(API, CQclient, SCHEDULE):
     '''
     口袋48模块
     : func _todo: 查询房间消息
     '''
+
     def __init__(self, mobile, password, membername):
         super().__init__(mobile, password, membername)
         CQclient.__init__(self)
@@ -84,14 +86,14 @@ class POCKET48(API, CQclient, SCHEDULE):
                 playStreamPath = "暂无"
             msg = [{'type': 'text', 'data': {
                 'text': '小偶像开直播啦 \n直播标题：%s \n' % extInfo['liveTitle']}},
-                {'type': 'image', 'data': {
-                    'file': 'https://source.48.cn%s' % extInfo['liveCover']}},
-                {'type': 'text', 'data': {
-                    'text': '直播地址：https://h5.48.cn/2019appshare/memberLiveShare/index.html?id=%s\n推流地址：%s\n开始时间：%s' % (
-                         extInfo['liveId'],
-                         playStreamPath,
-                         self.stamp2str(msg['msgTime']))}}
-            ]
+                   {'type': 'image', 'data': {
+                       'file': 'https://source.48.cn%s' % extInfo['liveCover']}},
+                   {'type': 'text', 'data': {
+                       'text': '直播地址：https://h5.48.cn/2019appshare/memberLiveShare/index.html?id=%s\n推流地址：%s\n开始时间：%s' % (
+                           extInfo['liveId'],
+                           playStreamPath,
+                           self.stamp2str(msg['msgTime']))}}
+                   ]
         elif extInfo['messageType'] == 'FLIPCARD':
             msg = ('%s：%s\n问题内容：%s\n%s' % (
                 nickName, extInfo['answer'],
@@ -118,11 +120,11 @@ class POCKET48(API, CQclient, SCHEDULE):
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
             'text': '%s：视频消息' % extInfo['user']['nickName']}},
-            {'type': 'text', 'data': {
-                'text': '%s' % bodys['url']}},
-            {'type': 'text', 'data': {
-                'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
-        ]
+               {'type': 'text', 'data': {
+                   'text': '%s' % bodys['url']}},
+               {'type': 'text', 'data': {
+                   'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
+               ]
         return msg
 
     def audio(self, msg):
@@ -135,11 +137,11 @@ class POCKET48(API, CQclient, SCHEDULE):
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
             'text': '%s：语音消息' % extInfo['user']['nickName']}},
-            {'type': 'record', 'data': {
-                'file': '%s' % bodys['url']}},
-            {'type': 'text', 'data': {
-                'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
-        ]
+               {'type': 'record', 'data': {
+                   'file': '%s' % bodys['url']}},
+               {'type': 'text', 'data': {
+                   'text': '\n%s' % self.stamp2str(msg['msgTime'])}}
+               ]
         return msg
 
     def image(self, msg):
@@ -152,16 +154,16 @@ class POCKET48(API, CQclient, SCHEDULE):
         extInfo = eval(msg['extInfo'])
         msg = [{'type': 'text', 'data': {
             'text': '%s：图片消息' % extInfo['user']['nickName']}},
-            {'type': 'image', 'data': {
-                'file': '%s' % bodys['url']}},
-            {'type': 'text', 'data': {
-                'text': '%s' % self.stamp2str(msg['msgTime'])}}
-        ]
+               {'type': 'image', 'data': {
+                   'file': '%s' % bodys['url']}},
+               {'type': 'text', 'data': {
+                   'text': '%s' % self.stamp2str(msg['msgTime'])}}
+               ]
         return msg
 
     def _todo(self):
         '''
-        发送格式化后的消息到酷Q
+        发送格式化后的消息到酷Q，间隔1秒
         :return: 0
         '''
         for chat in self.update_chat():
@@ -171,11 +173,5 @@ class POCKET48(API, CQclient, SCHEDULE):
 
 
 if __name__ == '__main__':
-    miffy = POCKET48(urs, psw, '方琪')  # 实例化小偶像监控
-    miffy.interval_time = 200
-    satsuko = POCKET48(urs, psw, '李姗姗')
-    satsuko.interval_time = 240
-    miffy.run()  # 开启计划任务
-    satsuko.run()
     schedule = SCHEDULE()
     schedule.block()  # 阻塞至进程关闭

@@ -66,3 +66,16 @@ class MongoDB:
             return self.post.distinct(label, filter=select)
         except BaseException:
             return False
+
+    def max(self, keys, find={}, limit=1):
+        try:
+            return self.post.find(find).sort([(keys,-1)]).limit(limit)
+        except:
+            print(traceback.print_exc())
+            return False
+
+    def min(self, keys, find={}, limit=1):
+        try:
+            return self.post.find(find).sort([(keys,1)]).limit(limit)
+        except BaseException:
+            return False
