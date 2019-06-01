@@ -1,5 +1,9 @@
 # Pocket48
 -----------------------------------
+本项目仅供学习测试交流使用
+
+web版地址：[48.yinheng.xyz](https://48.yinheng.xyz)
+
 @mail: ssr@yinheng.xyz
 #### 部分逻辑参考[chinshin/CQBot_hzx](https://github.com/chinshin/CQBot_hzx)
 ### 口袋48APP 监控(Python3)，该项目实现以下功能:
@@ -12,6 +16,10 @@
 
 ## Update Log
 --------------------------
+#### 2019.06.02 Ver 2.0.0
+
+增加web版口袋监控,基于flask + vuejs + bootstrap-vue搭建
+
 #### 2019.04.29 Ver 1.2.0
 
 增加摩点监控功能
@@ -41,14 +49,26 @@
 
 ## 使用方法
 --------------------------
+### QQ机器人
 1. win server: 安装酷Q Pro，进入开发者模式；
 2. 把 `io.github.richardchien.coolqhttpapi.cpk`([release地址](https://github.com/richardchien/coolq-http-api/releases)) 加入酷Q文件夹下app文件夹，重启酷Q并在应用管理中打开该http-api；
-3. 安装`cqhttp` 和 `apscheduler`，终端输入：`pip install cqhttp` 和 `pip install apscheduler `，环境为py2的使用pip3安装；
+3. 安装`cqhttp` 和 `apscheduler`，终端输入：`pip install cqhttp` 和 `pip install apscheduler `，环境为py3的使用pip3安装；
 4. 开启`mongodb`本地服务器,开启酷Q；
 5. 修改`main.py`中的用户名、密码、偶像名、摩点项目编号；
 6. 修改`cqapi.py`中的QQ号；
 7. 开启`main.py`
+### web版口袋监控
+#### 开发环境
+$npm insatll
 
+$npm run dev
+#### 生产环境
+$npm insatll
+
+$npm run build
+
+#### server
+$python app.py
 ## 方法说明
 --------------------------
 |方法|功能|参数|
