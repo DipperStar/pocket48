@@ -27,7 +27,7 @@ class API(object):
         self.mobile = mobile
         self.password = password
         self.membername = membername
-        self.dbtoken = MongoDB('Poket48', 'dbtoken')
+        self.dbtoken = MongoDB('Pocket48', 'dbtoken')
         self.headers = {
             'Host': 'pocketapi.48.cn',
             'accept': '*/*',
