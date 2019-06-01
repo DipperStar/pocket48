@@ -2,7 +2,7 @@
 -----------------------------------
 本项目仅供学习测试交流使用
 
-web版地址：[48.yinheng.xyz](https://48.yinheng.xyz)
+web版地址：[48.yinheng.xyz](http://48.yinheng.xyz)
 
 @mail: ssr@yinheng.xyz
 #### 部分逻辑参考[chinshin/CQBot_hzx](https://github.com/chinshin/CQBot_hzx)
