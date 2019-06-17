@@ -7,7 +7,7 @@ web版地址：[48.yinheng.xyz](http://48.yinheng.xyz)
 @mail: ssr@yinheng.xyz
 #### 部分逻辑参考[chinshin/CQBot_hzx](https://github.com/chinshin/CQBot_hzx)
 ### 口袋48APP 监控(Python3)，该项目实现以下功能:
-* 成员房间消息监控
+* 成员房间消息监控（coolq、web）
 * 摩点监控
 * 支持多账号登录
 * 支持多成员监控
